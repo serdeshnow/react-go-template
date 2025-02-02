@@ -1,0 +1,14 @@
+http://localhost:3000 {
+    root * /usr/share/caddy
+    file_server
+    encode gzip
+
+    @root_path path /
+    respond @root_path "Caddy is running on port 3000" 200
+
+    handle_path /api/* {
+        reverse_proxy backend:8080
+    }
+
+    try_files {path} /index.html
+}
