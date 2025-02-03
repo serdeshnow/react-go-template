@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"golang.org/x/crypto/bcrypt"
-	"react-fsd-template/internal/models"
-	"react-fsd-template/internal/repository"
-	"react-fsd-template/pkg/log"
+	"react-go-template/internal/models"
+	"react-go-template/internal/repository"
+	"react-go-template/pkg/log"
 )
 
 type userService struct {

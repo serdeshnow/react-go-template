@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"react-fsd-template/internal/models"
+	"react-go-template/internal/models"
 )
 
 type User interface {

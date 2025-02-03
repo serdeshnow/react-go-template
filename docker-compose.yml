@@ -5,7 +5,7 @@ services:
       dockerfile: config/docker/Dockerfile
       args:
         VITE_API_URL: ${API_BASEURL} # Pass build-time variable for API URL
-    container_name: template-frontend
+    container_name: frontend
     restart: always
     environment:
       - VITE_API_URL=${API_BASEURL}
@@ -21,7 +21,7 @@ services:
     build:
       context: ./backend
       dockerfile: deploy/Dockerfile
-    container_name: template-backend
+    container_name: backend
     restart: on-failure:3
     env_file:
       - backend/deploy/.env

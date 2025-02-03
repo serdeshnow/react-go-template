@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"react-fsd-template/internal/models"
-	"react-fsd-template/internal/repository"
+	"react-go-template/internal/models"
+	"react-go-template/internal/repository"
 )
 
 type User struct {

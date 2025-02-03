@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"react-fsd-template/internal/models"
-	"react-fsd-template/internal/service"
+	"react-go-template/internal/models"
+	"react-go-template/internal/service"
 )
 
 type UserHandler struct {

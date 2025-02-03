@@ -1,4 +1,4 @@
-module react-fsd-template
+module react-go-template
 
 go 1.22.0
 

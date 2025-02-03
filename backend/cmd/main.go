@@ -1,10 +1,10 @@
 package main
 
 import (
-	"react-fsd-template/internal/delivery"
-	"react-fsd-template/pkg/config"
-	"react-fsd-template/pkg/database"
-	"react-fsd-template/pkg/log"
+	"react-go-template/internal/delivery"
+	"react-go-template/pkg/config"
+	"react-go-template/pkg/database"
+	"react-go-template/pkg/log"
 )
 
 func main() {

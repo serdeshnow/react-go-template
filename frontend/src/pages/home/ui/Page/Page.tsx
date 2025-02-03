@@ -1,11 +1,26 @@
 import ReactLogo from '@/shared/assets/svg/react.svg?react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import viteLogo from '/vite.svg';
 import s from './Page.module.scss';
 import { env } from '@/shared/lib/env.ts';
+import { fetchUser } from '../../api/user-api.ts';
 
 export const HomePage = () => {
   const [count, setCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchUser();
+        console.log(data);
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   return (
     <>

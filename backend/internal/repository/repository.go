@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"react-fsd-template/internal/models"
+	"react-go-template/internal/models"
 )
 
 type UserRepo interface {

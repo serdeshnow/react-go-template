@@ -1,6 +1,6 @@
 package middleware
 
-import "react-fsd-template/pkg/log"
+import "react-go-template/pkg/log"
 
 type Middleware struct {
 	logger *log.Logs
