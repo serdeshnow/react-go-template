@@ -1,3 +1,20 @@
+## TYRY #2
+garbagegogoriki.ru {
+encode gzip
+handle /api/* {
+reverse_proxy http://82.97.249.28:8000
+}
+handle {
+root * /app/dist
+try_files {path} /index.html
+file_server
+}
+handle_errors {
+respond "{err.status_code} {err.status_text}"
+}
+}
+
+
 ## без сертификата (локалка):
 http://localhost:3000 {
   root * /usr/share/caddy
