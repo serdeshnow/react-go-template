@@ -1,9 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
-SELECT 'up SQL query';
 CREATE TABLE IF NOT EXISTS users
 (
-    id              SERIAL NOT NULL PRIMARY KEY,
+    id              SERIAL PRIMARY KEY,
     email           varchar UNIQUE,
     name            varchar,
     sur_name        varchar,
@@ -13,6 +12,5 @@ CREATE TABLE IF NOT EXISTS users
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
 DROP TABLE IF EXISTS users;
 -- +goose StatementEnd

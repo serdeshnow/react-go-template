@@ -20,75 +20,85 @@ func InitUserService(userRepo repository.UserRepo, log *log.Logs) service.UserSe
 	return &ServUser{UserRepo: userRepo, log: log}
 }
 
-func (serv ServUser) Create(ctx context.Context, user models.UserCreate) (int, error) {
+func (s ServUser) Create(ctx context.Context, user models.UserCreate) (int, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.PWD), 10)
 	if err != nil {
-		serv.log.Error(err.Error())
+		s.log.Error(err.Error())
 		return 0, err
 	}
 	newUser := models.UserCreate{
 		UserBase: user.UserBase,
 		PWD:      string(hashedPassword),
 	}
-	id, err := serv.UserRepo.Create(ctx, newUser)
+	id, err := s.UserRepo.Create(ctx, newUser)
 	if err != nil {
-		serv.log.Error(err.Error())
+		s.log.Error(err.Error())
 		return 0, err
 	}
-	serv.log.Info(fmt.Sprintf("create user %v", id))
+	s.log.Info(fmt.Sprintf("create user %v", id))
 	return id, nil
 }
 
-func (serv ServUser) Get(ctx context.Context, id int) (*models.User, error) {
-	user, err := serv.UserRepo.Get(ctx, id)
+func (s ServUser) Get(ctx context.Context, id int) (*models.User, error) {
+	user, err := s.UserRepo.Get(ctx, id)
 	if err != nil {
-		serv.log.Error(err.Error())
+		s.log.Error(err.Error())
 		return nil, err
 	}
-	serv.log.Info(fmt.Sprintf("get user %v", id))
+	s.log.Info(fmt.Sprintf("get user %v", id))
 	return user, nil
 }
 
-func (serv ServUser) Login(ctx context.Context, user models.UserLogin) (int, error) {
-	id, pwd, err := serv.UserRepo.GetPWDbyEmail(ctx, user.Email)
+func (s ServUser) GetAll(ctx context.Context) ([]models.User, error) {
+	users, err := s.UserRepo.GetAll(ctx)
 	if err != nil {
-		serv.log.Error(err.Error())
+		s.log.Error(err.Error())
+		return nil, err
+	}
+	s.log.Info("get users")
+	return users, nil
+}
+
+func (s ServUser) Login(ctx context.Context, user models.UserLogin) (int, error) {
+	id, pwd, err := s.UserRepo.GetPWDbyEmail(ctx, user.Email)
+	if err != nil {
+		s.log.Error(err.Error())
 		return 0, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(pwd), []byte(user.PWD))
 	if err != nil {
-		serv.log.Error(cerr.Err(cerr.InvalidPWD, err).Str())
-		return 0, cerr.Err(cerr.InvalidPWD, err).Error()
+		s.log.Error(cerr.InvalidPWD(err).Error())
+		return 0, cerr.InvalidPWD(err)
 	}
-	serv.log.Info(fmt.Sprintf("login user %v", id))
+	s.log.Info(fmt.Sprintf("login user %v", id))
 	return id, nil
 }
 
-func (serv ServUser) ChangePWD(ctx context.Context, user models.UserChangePWD) (int, error) {
+func (s ServUser) ChangePWD(ctx context.Context, user models.UserChangePWD) (int, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.NewPWD), 10)
 	if err != nil {
-		serv.log.Error(cerr.Err(cerr.Hash, err).Str())
-		return 0, cerr.Err(cerr.Hash, err).Error()
+		s.log.Error(cerr.Hash(err).Error())
+		return 0, cerr.Hash(err)
 	}
 	newPWD := models.UserChangePWD{
 		ID:     user.ID,
 		NewPWD: string(hash),
 	}
-	id, err := serv.UserRepo.ChangePWD(ctx, newPWD)
+	id, err := s.UserRepo.ChangePWD(ctx, newPWD)
 	if err != nil {
-		serv.log.Error(err.Error())
+		s.log.Error(err.Error())
 		return 0, err
 	}
-	serv.log.Info(fmt.Sprintf("change pwd user %v", id))
+	s.log.Info(fmt.Sprintf("change pwd user %v", id))
 	return id, nil
 }
 
-func (serv ServUser) Delete(ctx context.Context, id int) error {
-	err := serv.UserRepo.Delete(ctx, id)
+func (s ServUser) Delete(ctx context.Context, id int) error {
+	err := s.UserRepo.Delete(ctx, id)
 	if err != nil {
-		serv.log.Error(err.Error())
+		s.log.Error(err.Error())
 		return err
 	}
-	serv.log.Info(fmt.Sprintf("delete user %v", id))
+	s.log.Info(fmt.Sprintf("delete user %v", id))
 	return nil
 }

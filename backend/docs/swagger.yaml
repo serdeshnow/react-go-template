@@ -27,21 +27,15 @@ definitions:
 info:
   contact: {}
 paths:
-  /user/{id}:
+  /user/:
     get:
       consumes:
       - application/json
-      parameters:
-      - description: UserID
-        in: query
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Successfully get user
+          description: Successfully get users
           schema:
             type: integer
         "400":
@@ -56,43 +50,9 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get user
+      summary: Get users
       tags:
       - user
-  /user/change/pwd:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: change password
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserChangePWD'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success changing
-          schema:
-            type: integer
-        "400":
-          description: Invalid id
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Change password
-      tags:
-      - user
-  /user/create:
     post:
       consumes:
       - application/json
@@ -125,7 +85,7 @@ paths:
       summary: Create user
       tags:
       - user
-  /user/delete/{id}:
+  /user/{id}:
     delete:
       consumes:
       - application/json
@@ -155,6 +115,37 @@ paths:
               type: string
             type: object
       summary: Delete user
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: UserID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get user
+          schema:
+            type: integer
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user
       tags:
       - user
   /user/login:
@@ -188,6 +179,39 @@ paths:
               type: string
             type: object
       summary: Login user
+      tags:
+      - user
+  /user/pwd:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: change password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserChangePWD'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success changing
+          schema:
+            type: integer
+        "400":
+          description: Invalid id
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Change password
       tags:
       - user
 swagger: "2.0"

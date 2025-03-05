@@ -16,11 +16,11 @@ func InitUserRepository(db *sqlx.DB) repository.UserRepo {
 	return RepoUser{db: db}
 }
 
-func (repo RepoUser) Create(ctx context.Context, user models.UserCreate) (int, error) {
+func (r RepoUser) Create(ctx context.Context, user models.UserCreate) (int, error) {
 	var id int
-	transaction, err := repo.db.BeginTxx(ctx, nil)
+	transaction, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return 0, cerr.Err(cerr.Transaction, err).Error()
+		return 0, cerr.Transaction(err)
 	}
 	row := transaction.QueryRowContext(ctx, `INSERT INTO users (name, sur_name, email, hashed_password) VALUES ($1, $2, $3, $4) returning id;`,
 		user.Name, user.SurName, user.Email, user.PWD)
@@ -28,107 +28,124 @@ func (repo RepoUser) Create(ctx context.Context, user models.UserCreate) (int, e
 	err = row.Scan(&id)
 	if err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return 0, cerr.Err(cerr.Rollback, rbErr).Error()
+			return 0, cerr.Rollback(rbErr)
 		}
-		return 0, cerr.Err(cerr.Scan, err).Error()
+		return 0, cerr.Scan(err)
 	}
-	if err := transaction.Commit(); err != nil {
+	if err = transaction.Commit(); err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return 0, cerr.Err(cerr.Rollback, rbErr).Error()
+			return 0, cerr.Rollback(rbErr)
 		}
-		return 0, cerr.Err(cerr.Commit, err).Error()
+		return 0, cerr.Commit(err)
 	}
 	return id, nil
 }
 
-func (repo RepoUser) Get(ctx context.Context, id int) (*models.User, error) {
+func (r RepoUser) Get(ctx context.Context, id int) (*models.User, error) {
 	var user models.User
-	row := repo.db.QueryRowContext(ctx, `SELECT name, sur_name, email from users WHERE id = $1;`, id)
+	row := r.db.QueryRowContext(ctx, `SELECT name, sur_name, email from users WHERE id = $1;`, id)
 	err := row.Scan(&user.Name, &user.SurName, &user.Email)
 	if err != nil {
-		return nil, cerr.Err(cerr.Scan, err).Error()
+		return nil, cerr.Scan(err)
 	}
 	user.ID = id
 	return &user, nil
 }
 
-func (repo RepoUser) GetPWDbyEmail(ctx context.Context, user string) (int, string, error) {
+func (r RepoUser) GetAll(ctx context.Context) ([]models.User, error) {
+	var users []models.User
+	rows, err := r.db.QueryContext(ctx, `SELECT id, name, sur_name, email from users;`)
+	if err != nil {
+		return nil, cerr.Execution(err)
+	}
+	for rows.Next() {
+		var user models.User
+		err = rows.Scan(&user.ID, &user.Name, &user.SurName, &user.Email)
+		if err != nil {
+			return nil, cerr.Scan(err)
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+func (r RepoUser) GetPWDbyEmail(ctx context.Context, user string) (int, string, error) {
 	var pwd string
 	var id int
-	rows := repo.db.QueryRowContext(ctx, `SELECT id,  hashed_password from users WHERE email = $1;`, user)
-	err := rows.Scan(&id, &pwd)
+	row := r.db.QueryRowContext(ctx, `SELECT id,  hashed_password from users WHERE email = $1;`, user)
+	err := row.Scan(&id, &pwd)
 	if err != nil {
-		return 0, "", cerr.Err(cerr.Scan, err).Error()
+		return 0, "", cerr.Scan(err)
 	}
 	return id, pwd, nil
 }
 
-func (repo RepoUser) ChangePWD(ctx context.Context, user models.UserChangePWD) (int, error) {
-	transaction, err := repo.db.BeginTx(ctx, nil)
+func (r RepoUser) ChangePWD(ctx context.Context, user models.UserChangePWD) (int, error) {
+	transaction, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return 0, cerr.Err(cerr.Transaction, err).Error()
+		return 0, cerr.Transaction(err)
 	}
 	result, err := transaction.ExecContext(ctx, `UPDATE users SET hashed_password=$2 WHERE id=$1;`, user.ID, user.NewPWD)
 	if err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return 0, cerr.Err(cerr.Rollback, rbErr).Error()
+			return 0, cerr.Rollback(rbErr)
 		}
-		return 0, cerr.Err(cerr.ExecContext, err).Error()
+		return 0, cerr.ExecContext(err)
 	}
 	count, err := result.RowsAffected()
 	if err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return 0, cerr.Err(cerr.Rollback, rbErr).Error()
+			return 0, cerr.Rollback(rbErr)
 		}
-		return 0, cerr.Err(cerr.Rows, err).Error()
+		return 0, cerr.Rows(err)
 	}
 
 	if count != 1 {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return 0, cerr.Err(cerr.Rollback, rbErr).Error()
+			return 0, cerr.Rollback(rbErr)
 		}
-		return 0, cerr.Err(cerr.NoOneRow, err).Error()
+		return 0, cerr.NoOneRow(err)
 	}
 
 	if err = transaction.Commit(); err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return 0, cerr.Err(cerr.Rollback, rbErr).Error()
+			return 0, cerr.Rollback(rbErr)
 		}
-		return 0, cerr.Err(cerr.Commit, err).Error()
+		return 0, cerr.Commit(err)
 	}
 	return user.ID, nil
 }
 
-func (repo RepoUser) Delete(ctx context.Context, id int) error {
-	transaction, err := repo.db.BeginTxx(ctx, nil)
+func (r RepoUser) Delete(ctx context.Context, id int) error {
+	transaction, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-		return cerr.Err(cerr.Transaction, err).Error()
+		return cerr.Transaction(err)
 	}
 	result, err := transaction.ExecContext(ctx, `DELETE FROM users WHERE id=$1;`, id)
 	if err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return cerr.Err(cerr.Rollback, rbErr).Error()
+			return cerr.Rollback(rbErr)
 		}
-		return cerr.Err(cerr.ExecContext, err).Error()
+		return cerr.ExecContext(err)
 	}
 	count, err := result.RowsAffected()
 	if err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return cerr.Err(cerr.Rollback, rbErr).Error()
+			return cerr.Rollback(rbErr)
 		}
-		return cerr.Err(cerr.Rows, err).Error()
+		return cerr.Rows(err)
 	}
 	if count != 1 {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return cerr.Err(cerr.Rollback, rbErr).Error()
+			return cerr.Rollback(rbErr)
 		}
-		return cerr.Err(cerr.NoOneRow, err).Error()
+		return cerr.NoOneRow(err)
 	}
 	if err = transaction.Commit(); err != nil {
 		if rbErr := transaction.Rollback(); rbErr != nil {
-			return cerr.Err(cerr.Rollback, rbErr).Error()
+			return cerr.Rollback(rbErr)
 		}
-		return cerr.Err(cerr.Commit, err).Error()
+		return cerr.Commit(err)
 	}
 	return nil
 }
