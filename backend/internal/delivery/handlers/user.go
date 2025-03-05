@@ -2,21 +2,22 @@ package handlers
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
+	"project/internal/models"
+	"project/internal/service"
 	"strconv"
 	"time"
-	"react-go-template/internal/models"
-	"react-go-template/internal/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	service service.User
+	service service.UserServ
 }
 
-func InitUserHandler(userService service.User) UserHandler {
+func InitUserHandler(service service.UserServ) UserHandler {
 	return UserHandler{
-		service: userService,
+		service: service,
 	}
 }
 
@@ -24,22 +25,23 @@ func InitUserHandler(userService service.User) UserHandler {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param data body models.CreateUser true "user create"
+// @Param data body models.UserCreate true "user create"
 // @Success 200 {object} int "Successfully created user"
 // @Failure 400 {object} map[string]string "Invalid input"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /user/create [post]
-func (h UserHandler) Create(g *gin.Context) {
-	var creation models.CreateUser
+func (handler UserHandler) Create(g *gin.Context) {
+	var newUser models.UserCreate
 
-	if err := g.ShouldBindJSON(&creation); err != nil {
+	if err := g.ShouldBindJSON(&newUser); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*4)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	id, err := h.service.Create(ctx, creation)
+	id, err := handler.service.Create(ctx, newUser)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -54,26 +56,82 @@ func (h UserHandler) Create(g *gin.Context) {
 // @Produce  json
 // @Param id query int true "UserID"
 // @Success 200 {object} int "Successfully get user"
-// @Failure 400 {object} map[string]string "Invalid UserID"
+// @Failure 400 {object} map[string]string "Invalid input"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /user/get/{id} [get]
-func (h UserHandler) GetUser(g *gin.Context) {
-	userID := g.Query("id")
-
-	id, err := strconv.Atoi(userID)
+// @Router /user/{id} [get]
+func (handler UserHandler) Get(c *gin.Context) {
+	id := c.Query("id")
+	aid, err := strconv.Atoi(id)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx := c.Request.Context()
+
+	user, err := handler.service.Get(ctx, aid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+// @Summary Change password
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param data body models.UserChangePWD true "change password"
+// @Success 200 {object} int "Success changing"
+// @Failure 400 {object} map[string]string "Invalid id"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /user/change/pwd [put]
+func (handler UserHandler) ChangePWD(g *gin.Context) {
+	var user models.UserChangePWD
+	if err := g.ShouldBindJSON(&user); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	user, err := h.service.GetMe(ctx, id)
+	id, err := handler.service.ChangePWD(ctx, user)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	g.JSON(http.StatusOK, gin.H{"user": &user})
+
+	g.JSON(http.StatusOK, gin.H{"change": "success", "id": id})
+}
+
+// @Summary Login user
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param data body models.UserLogin true "user login"
+// @Success 200 {object} int "Successfully login user"
+// @Failure 400 {object} map[string]string "Invalid input"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /user/login [post]
+func (handler UserHandler) Login(g *gin.Context) {
+	var user models.UserLogin
+
+	if err := g.ShouldBindJSON(&user); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx := g.Request.Context()
+
+	id, err := handler.service.Login(ctx, user)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	g.JSON(http.StatusOK, gin.H{"userID": id})
 }
 
 // @Summary Delete user
@@ -85,7 +143,7 @@ func (h UserHandler) GetUser(g *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid id"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /user/delete/{id} [delete]
-func (h UserHandler) Delete(g *gin.Context) {
+func (handler UserHandler) Delete(g *gin.Context) {
 	userID := g.Query("id")
 	id, err := strconv.Atoi(userID)
 	if err != nil {
@@ -95,39 +153,10 @@ func (h UserHandler) Delete(g *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	err = h.service.Delete(ctx, id)
+	err = handler.service.Delete(ctx, id)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	g.JSON(http.StatusOK, gin.H{"delete": id})
-}
-
-// @Summary Login user
-// @Tags user
-// @Accept  json
-// @Produce  json
-// @Param data body models.CreateUser true "user login"
-// @Success 200 {object} int "Successfully login user"
-// @Failure 400 {object} map[string]string "Invalid password"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /user/login [post]
-func (h UserHandler) Login(g *gin.Context) {
-	var User models.CreateUser
-
-	if err := g.ShouldBindJSON(&User); err != nil {
-		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	id, err := h.service.Login(ctx, User)
-	if err != nil {
-		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	g.JSON(http.StatusOK, gin.H{"id": id})
 }

@@ -1,10 +1,11 @@
+version: "3.8"
 services:
   frontend:
     build:
       context: ./frontend
       dockerfile: config/docker/Dockerfile
       args:
-        VITE_API_URL: ${API_BASEURL} # Pass build-time variable for API URL
+        VITE_API_URL: ${API_BASEURL}
     container_name: frontend
     restart: always
     environment:
@@ -18,39 +19,41 @@ services:
       backend:
         condition: service_started
 
+  postgres-database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h postgres-database -p 5432" ] # Изменено
+      interval: 3s
+      timeout: 3s
+      retries: 100
+    volumes:
+      - ../../data/postgres:/var/lib/postgresql/dat
+
   backend:
     build:
-      context: ./backend
+      context: ./backend/
       dockerfile: deploy/Dockerfile
     container_name: backend
-    restart: on-failure:3
-    env_file:
-      - backend/deploy/.env
     ports:
       - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: postgres:latest
-    container_name: database
-    restart: always
-    env_file:
-      - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      TIMEOUT: ${TIME_OUT}
+    depends_on:
+      - postgres-database
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${DB_PORT}:5432"
+      - ../../data/app:/backend/cmd/log
+
 
 volumes:
   postgres_data:

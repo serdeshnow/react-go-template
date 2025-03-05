@@ -1,6 +1,8 @@
 package middleware
 
-import "react-go-template/pkg/log"
+import (
+	"project/pkg/log"
+)
 
 type Middleware struct {
 	logger *log.Logs

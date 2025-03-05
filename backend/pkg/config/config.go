@@ -13,12 +13,20 @@ const (
 	DBPassword = "DB_PASSWORD"
 	DBHost     = "DB_HOST"
 	DBPort     = "DB_PORT"
+
+	TimeOut           = "TIME_OUT"
+	JWTExpire         = "JWT_EXPIRE"
+	Secret            = "SECRET"
+	SessionExpiration = "SESSION_EXPIRATION"
+
+	RedisHost     = "REDIS_HOST"
+	RedisPassword = "REDIS_PASSWORD"
+	RedisPort     = "REDIS_PORT"
 )
 
 func InitConfig() {
 	envPath, _ := os.Getwd()
 	envPath = filepath.Join(envPath, "..")
-	envPath = filepath.Join(envPath, "/backend")
 	envPath = filepath.Join(envPath, "/deploy")
 
 	viper.SetConfigName(".env")

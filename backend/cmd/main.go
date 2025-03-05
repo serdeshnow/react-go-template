@@ -1,22 +1,24 @@
 package main
 
 import (
-	"react-go-template/internal/delivery"
-	"react-go-template/pkg/config"
-	"react-go-template/pkg/database"
-	"react-go-template/pkg/log"
+	"project/internal/delivery"
+	"project/pkg/config"
+	"project/pkg/database"
+	"project/pkg/log"
 )
 
 func main() {
-	logger, infoFile, errorFile := log.InitLogger()
-	defer infoFile.Close()
-	defer errorFile.Close()
+	log, loggerInfoFile, loggerErrorFile := log.InitLogger()
+
+	defer loggerInfoFile.Close()
+	defer loggerErrorFile.Close()
 
 	config.InitConfig()
-	logger.Info("config init success")
+	log.Info("Config initialized")
 
 	db := database.GetDB()
-	logger.Info("db init success")
+	log.Info("Database initialized")
 
-	delivery.Start(db, logger)
+	delivery.Start(db, log)
+
 }

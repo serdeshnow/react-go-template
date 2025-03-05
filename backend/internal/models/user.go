@@ -1,13 +1,27 @@
 package models
 
-type GetUser struct {
-	ID      int    `json:"id"`
+type UserBase struct {
 	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Phone   string `json:"phone"`
+	SurName string `json:"sur_name"`
+	Email   string `json:"email"`
 }
 
-type CreateUser struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type User struct {
+	ID int `json:"id"`
+	UserBase
+}
+
+type UserCreate struct {
+	UserBase
+	PWD string `json:"pwd"`
+}
+
+type UserLogin struct {
+	Email string `json:"email"`
+	PWD   string `json:"password"`
+}
+
+type UserChangePWD struct {
+	ID     int    `json:"id"`
+	NewPWD string `json:"newPassword"`
 }

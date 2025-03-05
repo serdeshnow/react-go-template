@@ -1,5 +1,23 @@
 definitions:
-  models.CreateUser:
+  models.UserChangePWD:
+    properties:
+      id:
+        type: integer
+      newPassword:
+        type: string
+    type: object
+  models.UserCreate:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      pwd:
+        type: string
+      sur_name:
+        type: string
+    type: object
+  models.UserLogin:
     properties:
       email:
         type: string
@@ -9,6 +27,71 @@ definitions:
 info:
   contact: {}
 paths:
+  /user/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: UserID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully get user
+          schema:
+            type: integer
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user
+      tags:
+      - user
+  /user/change/pwd:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: change password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserChangePWD'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success changing
+          schema:
+            type: integer
+        "400":
+          description: Invalid id
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Change password
+      tags:
+      - user
   /user/create:
     post:
       consumes:
@@ -19,7 +102,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.CreateUser'
+          $ref: '#/definitions/models.UserCreate'
       produces:
       - application/json
       responses:
@@ -74,38 +157,6 @@ paths:
       summary: Delete user
       tags:
       - user
-  /user/get/{id}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: UserID
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully get user
-          schema:
-            type: integer
-        "400":
-          description: Invalid UserID
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get user
-      tags:
-      - user
   /user/login:
     post:
       consumes:
@@ -116,7 +167,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/models.CreateUser'
+          $ref: '#/definitions/models.UserLogin'
       produces:
       - application/json
       responses:
@@ -125,7 +176,7 @@ paths:
           schema:
             type: integer
         "400":
-          description: Invalid password
+          description: Invalid input
           schema:
             additionalProperties:
               type: string

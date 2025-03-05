@@ -2,13 +2,13 @@ package repository
 
 import (
 	"context"
-	"react-go-template/internal/models"
+	"project/internal/models"
 )
 
 type UserRepo interface {
-	Get(ctx context.Context, id int) (*models.GetUser, error)
+	Create(ctx context.Context, user models.UserCreate) (int, error)
+	Get(ctx context.Context, id int) (*models.User, error)
+	GetPWDbyEmail(ctx context.Context, user string) (int, string, error)
+	ChangePWD(ctx context.Context, user models.UserChangePWD) (int, error)
 	Delete(ctx context.Context, id int) error
-	Create(ctx context.Context, userCreate models.CreateUser) (int, error)
-	GetPwdByEmail(ctx context.Context, email string) (string, error)
-	GetIDByEmail(ctx context.Context, email string) (int, error)
 }
