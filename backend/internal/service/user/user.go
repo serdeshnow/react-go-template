@@ -1,14 +1,14 @@
 package user
 
 import (
+	"backend/internal/models"
+	"backend/internal/repository"
+	"backend/internal/service"
+	"backend/pkg/cerr"
+	"backend/pkg/log"
 	"context"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
-	"project/internal/models"
-	"project/internal/repository"
-	"project/internal/service"
-	"project/pkg/cerr"
-	"project/pkg/log"
 )
 
 type ServUser struct {

@@ -1,11 +1,11 @@
 package user
 
 import (
+	"backend/internal/models"
+	"backend/internal/repository"
+	"backend/pkg/cerr"
 	"context"
 	"github.com/jmoiron/sqlx"
-	"project/internal/models"
-	"project/internal/repository"
-	"project/pkg/cerr"
 )
 
 type RepoUser struct {

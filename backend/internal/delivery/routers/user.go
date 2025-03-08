@@ -1,12 +1,12 @@
 package routers
 
 import (
+	"backend/internal/delivery/handlers"
+	"backend/internal/repository/user"
+	userserv "backend/internal/service/user"
+	"backend/pkg/log"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"project/internal/delivery/handlers"
-	"project/internal/repository/user"
-	userserv "project/internal/service/user"
-	"project/pkg/log"
 )
 
 func RegisterUserRouter(r *gin.Engine, db *sqlx.DB, logger *log.Logs) *gin.RouterGroup {

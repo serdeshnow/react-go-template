@@ -1,11 +1,11 @@
 package database
 
 import (
+	"backend/pkg/config"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
-	"project/pkg/config"
 )
 
 func GetDB() *sqlx.DB {

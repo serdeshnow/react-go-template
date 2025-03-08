@@ -1,8 +1,8 @@
 package repository
 
 import (
+	"backend/internal/models"
 	"context"
-	"project/internal/models"
 )
 
 type UserRepo interface {

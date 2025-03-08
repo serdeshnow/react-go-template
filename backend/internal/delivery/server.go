@@ -1,13 +1,13 @@
 package delivery
 
 import (
+	"backend/docs"
+	"backend/internal/delivery/middleware"
+	"backend/internal/delivery/routers"
+	"backend/pkg/log"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"project/docs"
-	"project/internal/delivery/middleware"
-	"project/internal/delivery/routers"
-	"project/pkg/log"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

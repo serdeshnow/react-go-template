@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"backend/internal/models"
+	"backend/internal/service"
 	"context"
 	"net/http"
-	"project/internal/models"
-	"project/internal/service"
 	"strconv"
 	"time"
 

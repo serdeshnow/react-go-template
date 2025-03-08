@@ -1,8 +1,8 @@
 package service
 
 import (
+	"backend/internal/models"
 	"context"
-	"project/internal/models"
 )
 
 type UserServ interface {

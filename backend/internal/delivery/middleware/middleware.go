@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"project/pkg/log"
+	"backend/pkg/log"
 )
 
 type Middleware struct {

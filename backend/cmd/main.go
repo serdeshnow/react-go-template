@@ -1,10 +1,10 @@
 package main
 
 import (
-	"project/internal/delivery"
-	"project/pkg/config"
-	"project/pkg/database"
-	"project/pkg/log"
+	"backend/internal/delivery"
+	"backend/pkg/config"
+	"backend/pkg/database"
+	"backend/pkg/log"
 )
 
 func main() {
